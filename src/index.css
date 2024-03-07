@@ -1,0 +1,10 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  text-transform: capitalize;
+  margin: auto;
+  width: 80%;
+  text-align: center;
+}
