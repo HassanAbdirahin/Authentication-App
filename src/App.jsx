@@ -1,31 +1,42 @@
-import React, { useEffect, useState } from "react";
-import LoginSingup from "./LoginSingup";
-import User from "./User";
+import React, { useState } from "react";
 import { auth } from "./config/firebase";
-import { onAuthStateChanged } from "firebase/auth";
-import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { signOut } from "firebase/auth";
+import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import Home from "./pages/Home";
+import Chat from "./pages/Chat";
+import Login from "./pages/Login";
+import Messages from "./pages/Messages";
 
 const App = () => {
-  const [user, setUser] = useState(null);
+  const [isAuth, setIsAuth] = useState(false);
 
-  useEffect(() => {
-    onAuthStateChanged(auth, (currentUser) => {
-      setUser(currentUser);
-    });
-  }, []);
+  const logout = async () => {
+    await signOut(auth);
+    try {
+      localStorage.clear();
+      setIsAuth(false);
+      window.location.pathname = "/";
+    } catch (error) {
+      console.log(error);
+    }
+  };
   return (
     <Router>
+      <nav className="flex items-center justify-center gap-10 py-5 text-white bg-black">
+        <Link to="/">Home</Link>
+        {isAuth && <Link to="/chat">Chat</Link>}
+        {!isAuth ? (
+          <Link to="/login">Login</Link>
+        ) : (
+          <button onClick={logout} className="text-red-400 underline font-bold">
+            Logout
+          </button>
+        )}
+      </nav>
       <Routes>
-        <Route
-          path="/"
-          element={
-            <div>{!auth?.currentUser?.email ? <LoginSingup /> : <User />}</div>
-          }
-        />
-        <Route
-          path="*"
-          element={<h1 className="font-bold text-3xl m-10">404 Not Found!</h1>}
-        />
+        <Route path="/" element={<Home />} />
+        <Route path="/chat" element={<Messages setIsAuth={setIsAuth} />} />
+        <Route path="/login" element={<Login setIsAuth={setIsAuth} />} />
       </Routes>
     </Router>
   );
